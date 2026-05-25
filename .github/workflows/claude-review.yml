@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read          # Read repo files & diff
+      contents: write         # Needed for Claude's temporary working branch
       pull-requests: write    # Post review comments
       issues: write           # Reply in issue threads
       id-token: write         # OAuth token exchange (Pro/Max auth)
