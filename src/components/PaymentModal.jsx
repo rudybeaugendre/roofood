@@ -5,7 +5,8 @@ function generateOrderNumber() {
 }
 
 export default function PaymentModal({ cart, onClose, onSuccess }) {
-  const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+  // Multiplier par la quantité, sinon le sous-total ignore les articles ajoutés plusieurs fois
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = subtotal * 0.2;
   const total = subtotal + tax;
 

@@ -19,3 +19,21 @@ describe('removing an item from the cart', () => {
     expect(within(cart).getByText('Soup of the Day')).toBeInTheDocument();
   });
 });
+
+describe('adding the same dish twice', () => {
+  it('merges into a single line with quantity 2 instead of duplicating the line', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const addBruschetta = () =>
+      user.click(screen.getByRole('heading', { name: 'Bruschetta' }).closest('.dish-card').querySelector('.add-btn'));
+    await addBruschetta();
+    await addBruschetta();
+
+    const cart = screen.getByRole('complementary');
+    expect(within(cart).getAllByText('Bruschetta')).toHaveLength(1);
+    const cartItem = within(cart).getByText('Bruschetta').closest('.cart-item');
+    expect(within(cartItem).getByText('x2')).toBeInTheDocument();
+    expect(within(cartItem).getByText('€13.00')).toBeInTheDocument();
+  });
+});

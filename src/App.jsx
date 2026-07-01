@@ -11,6 +11,16 @@ export default function App() {
   const [showPayment, setShowPayment] = useState(false);
 
   function addToCart(dish) {
+    // Si le plat est déjà dans le panier, on augmente sa quantité au lieu de dupliquer la ligne
+    const existing = cart.find((item) => item.id === dish.id);
+    if (existing) {
+      setCart(
+        cart.map((item) =>
+          item.id === dish.id ? { ...item, quantity: item.quantity + 1 } : item
+        )
+      );
+      return;
+    }
     setCart([...cart, { ...dish, quantity: 1 }]);
   }
 
