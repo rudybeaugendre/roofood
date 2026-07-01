@@ -3,12 +3,16 @@ import { dishes, deliveryInfo } from "./data";
 import Menu from "./components/Menu";
 import Cart from "./components/Cart";
 import PaymentModal from "./components/PaymentModal";
+import ProfileModal from "./components/ProfileModal";
+import { useLoyalty } from "./useLoyalty";
 import "./App.css";
 
 export default function App() {
   const [cart, setCart] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showPayment, setShowPayment] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const loyalty = useLoyalty();
 
   function addToCart(dish) {
     // Si le plat est déjà dans le panier, on augmente sa quantité au lieu de dupliquer la ligne
@@ -43,9 +47,15 @@ export default function App() {
             Delivery in {deliveryInfo.etaMin}–{deliveryInfo.etaMax} min
           </span>
         </div>
-        <div className="cart-badge-wrapper">
-          <span className="cart-icon">🛒</span>
-          {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+        <div style={{display:"flex",alignItems:"center",gap:"20px"}}>
+          <button className="profile-icon-btn" onClick={() => setShowProfile(true)} aria-label="Loyalty profile">
+            <span className="profile-icon">⭐</span>
+            {loyalty.pointsBalance > 0 && <span className="cart-badge">{loyalty.pointsBalance}</span>}
+          </button>
+          <div className="cart-badge-wrapper">
+            <span className="cart-icon">🛒</span>
+            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+          </div>
         </div>
       </header>
 
@@ -61,8 +71,17 @@ export default function App() {
       {showPayment && (
         <PaymentModal
           cart={cart}
+          loyalty={loyalty}
           onClose={() => setShowPayment(false)}
           onSuccess={() => { setCart([]); setShowPayment(false); }}
+        />
+      )}
+      {showProfile && (
+        <ProfileModal
+          pointsBalance={loyalty.pointsBalance}
+          orders={loyalty.orders}
+          onRefund={loyalty.refundOrder}
+          onClose={() => setShowProfile(false)}
         />
       )}
     </div>

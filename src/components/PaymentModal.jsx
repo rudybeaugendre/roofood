@@ -4,7 +4,7 @@ function generateOrderNumber() {
   return "DL-" + Math.floor(10000 + Math.random() * 90000);
 }
 
-export default function PaymentModal({ cart, onClose, onSuccess }) {
+export default function PaymentModal({ cart, loyalty, onClose, onSuccess }) {
   // Multiplier par la quantité, sinon le sous-total ignore les articles ajoutés plusieurs fois
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = subtotal * 0.2;
@@ -14,10 +14,30 @@ export default function PaymentModal({ cart, onClose, onSuccess }) {
   const [orderNumber] = useState(generateOrderNumber);
   const [orderTime] = useState(() => new Date());
   const [form, setForm] = useState({ name: "", number: "", expiry: "", cvv: "" });
+  const [redeemPoints, setRedeemPoints] = useState(false);
+  // Figé au clic sur "Pay" : une fois la commande confirmée, le solde de points change
+  // (confirmOrder crédite/débite), donc on ne peut plus se fier à un recalcul live de la
+  // réduction pour l'étape "processing"/"success" — on fige l'aperçu tel qu'il était au paiement.
+  const [confirmedOrder, setConfirmedOrder] = useState(null);
+
+  // Aperçu seulement : aucun point n'est débité/crédité tant que la commande n'est pas confirmée (EC#3)
+  const redemption = redeemPoints
+    ? loyalty.previewRedemption(total)
+    : { applied: false, discountAmount: 0, pointsUsed: 0 };
+  const finalTotal = total - redemption.discountAmount;
+
+  function handlePay() {
+    setConfirmedOrder({ finalTotal, redemption });
+    setStep("processing");
+  }
 
   useEffect(() => {
     if (step !== "processing") return;
-    const timer = setTimeout(() => setStep("success"), 2000);
+    const timer = setTimeout(() => {
+      // Les points ne sont crédités/débités qu'ici, à la confirmation effective du paiement (EC#3)
+      loyalty.confirmOrder(confirmedOrder.finalTotal, confirmedOrder.redemption, orderNumber);
+      setStep("success");
+    }, 2000);
     return () => clearTimeout(timer);
   }, [step]);
 
@@ -68,6 +88,23 @@ export default function PaymentModal({ cart, onClose, onSuccess }) {
                 </li>
               ))}
             </ul>
+
+            <div className="loyalty-redeem-row">
+              <input
+                type="checkbox"
+                id="redeem-points"
+                checked={redeemPoints}
+                disabled={!loyalty.redemptionEligibility.eligible}
+                onChange={(e) => setRedeemPoints(e.target.checked)}
+              />
+              <label htmlFor="redeem-points">Use 100 points for €5 off</label>
+            </div>
+            {!loyalty.redemptionEligibility.eligible && (
+              <p className="loyalty-redeem-hint">
+                {loyalty.redemptionEligibility.missingPoints} more points until your next reward
+              </p>
+            )}
+
             <div className="modal-totals">
               <div className="modal-totals-row">
                 <span>Subtotal</span><span>€{subtotal.toFixed(2)}</span>
@@ -75,8 +112,13 @@ export default function PaymentModal({ cart, onClose, onSuccess }) {
               <div className="modal-totals-row">
                 <span>Tax (20%)</span><span>€{tax.toFixed(2)}</span>
               </div>
+              {redemption.applied && (
+                <div className="modal-totals-row">
+                  <span>Points discount</span><span>-€{redemption.discountAmount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="modal-totals-row modal-totals-total">
-                <span>Total</span><span>€{total.toFixed(2)}</span>
+                <span>Total</span><span>€{finalTotal.toFixed(2)}</span>
               </div>
             </div>
             <div className="modal-actions">
@@ -144,9 +186,9 @@ export default function PaymentModal({ cart, onClose, onSuccess }) {
               <button
                 className="modal-btn-primary"
                 disabled={!canPay}
-                onClick={() => setStep("processing")}
+                onClick={handlePay}
               >
-                Pay €{total.toFixed(2)}
+                Pay €{finalTotal.toFixed(2)}
               </button>
             </div>
           </div>
@@ -177,7 +219,7 @@ export default function PaymentModal({ cart, onClose, onSuccess }) {
             </ul>
             <div className="modal-totals">
               <div className="modal-totals-row modal-totals-total">
-                <span>Total paid</span><span>€{total.toFixed(2)}</span>
+                <span>Total paid</span><span>€{confirmedOrder.finalTotal.toFixed(2)}</span>
               </div>
             </div>
             <button className="modal-btn-primary modal-btn-full" onClick={onSuccess}>

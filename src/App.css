@@ -627,3 +627,82 @@ body {
   color: #9aaba0;
   margin-bottom: 8px;
 }
+
+/* ─── Profile entry point ─────────────────────────────── */
+.profile-icon-btn {
+  position: relative;
+  font-size: 1.5rem;
+  line-height: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* ─── Loyalty (checkout redemption) ───────────────────── */
+.loyalty-redeem-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #ede9e4;
+  padding: 14px 0;
+  margin-bottom: 4px;
+  font-size: 0.875rem;
+  color: #1a271f;
+}
+
+.loyalty-redeem-hint {
+  font-size: 0.8rem;
+  color: #9aaba0;
+  padding: 14px 0 4px;
+}
+
+/* ─── Profile Modal ────────────────────────────────────── */
+.loyalty-balance {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #00c1b2;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+
+.loyalty-order-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+
+.loyalty-order-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.loyalty-order-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.loyalty-order-date {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1a271f;
+}
+
+.loyalty-order-meta {
+  font-size: 0.8rem;
+  color: #9aaba0;
+}
+
+.loyalty-refunded-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #a8a4a0;
+  background: #f2efeb;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
